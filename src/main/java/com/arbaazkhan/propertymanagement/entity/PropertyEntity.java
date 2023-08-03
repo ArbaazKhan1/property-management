@@ -25,4 +25,9 @@ public class PropertyEntity {
     private String description;
     private Double price;
     private String address;
+
+    //Says that many properties can belong to 1 user
+    @ManyToOne(fetch = FetchType.LAZY) //it will not fetch the user data while fetching Property
+    @JoinColumn(name = "USER_ID", nullable = false)
+    private UserEntity userEntity;
 }

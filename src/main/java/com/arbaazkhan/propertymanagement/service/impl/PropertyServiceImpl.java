@@ -3,7 +3,11 @@ package com.arbaazkhan.propertymanagement.service.impl;
 import com.arbaazkhan.propertymanagement.converter.PropertyConverter;
 import com.arbaazkhan.propertymanagement.dto.PropertyDTO;
 import com.arbaazkhan.propertymanagement.entity.PropertyEntity;
+import com.arbaazkhan.propertymanagement.entity.UserEntity;
+import com.arbaazkhan.propertymanagement.exception.BusinessException;
+import com.arbaazkhan.propertymanagement.exception.ErrorModel;
 import com.arbaazkhan.propertymanagement.repository.PropertyRepository;
+import com.arbaazkhan.propertymanagement.repository.UserRepository;
 import com.arbaazkhan.propertymanagement.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,16 +24,32 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Autowired
     private PropertyRepository propertyRepository;
-
     @Autowired
     private PropertyConverter propertyConverter;
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public PropertyDTO saveProperty(PropertyDTO propertyDTO) {
-       PropertyEntity pe = propertyConverter.convertDTOtoEntity(propertyDTO);
-       propertyRepository.save(pe); //store the data onto the DB
-       PropertyDTO dto = propertyConverter.convertEntitytoDTO(pe); //return saved data as dto
+        //get user data
+       Optional<UserEntity> user = userRepository.findById(propertyDTO.getUserId());
+       if (user.isPresent()){
 
-       return dto;
+           PropertyEntity pe = propertyConverter.convertDTOtoEntity(propertyDTO);
+           pe.setUserEntity(user.get());
+           propertyRepository.save(pe); //store the data onto the DB
+           propertyDTO = propertyConverter.convertEntitytoDTO(pe); //return saved data as dto
+
+       } else {
+           List<ErrorModel> errorModelList = new ArrayList<>();
+           ErrorModel errorModel = new ErrorModel();
+           errorModel.setCode("USER_ID_NOT_EXIST");
+           errorModel.setMessage("User does not exist");
+           errorModelList.add(errorModel);
+
+           throw new BusinessException(errorModelList);
+       }
+       return propertyDTO;
     }
 
     @Override
@@ -78,6 +98,18 @@ public class PropertyServiceImpl implements PropertyService {
             dto = propertyConverter.convertEntitytoDTO(pe);
         }
         return dto;
+    }
+
+    @Override
+    public List<PropertyDTO> getAllUserProperties(Long userId) {
+        List<PropertyDTO> propertyList = new ArrayList<>();
+        List<PropertyEntity> propertyEntityList = (List<PropertyEntity>) propertyRepository.findAllByUserEntityId(userId);
+
+        for(PropertyEntity pe: propertyEntityList){
+            propertyList.add(propertyConverter.convertEntitytoDTO(pe));
+        }
+
+        return propertyList;
     }
 
     @Override

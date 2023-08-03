@@ -31,15 +31,15 @@ public class PropertyController {
     @PostMapping("/properties")
     public ResponseEntity<PropertyDTO> saveProperty(@RequestBody PropertyDTO propertyDTO) {
         propertyDTO = propertyService.saveProperty(propertyDTO);
-        System.out.println(propertyDTO);
+//        System.out.println(propertyDTO);
         return new ResponseEntity<>(propertyDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/properties")
     public ResponseEntity<List<PropertyDTO>> getAllProperties() {
         //wil print out what dummy is saved as in the environment(application.properties) the code is currently running in
-        System.out.println(dummy);
-        System.out.println(dbURL);
+//        System.out.println(dummy);
+//        System.out.println(dbURL);
         List<PropertyDTO> propertyList = propertyService.getAllProperties();
         return new ResponseEntity<>(propertyList, HttpStatus.OK);
     }

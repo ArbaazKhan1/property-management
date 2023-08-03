@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("api/v1/user")
 public class UserController {
@@ -17,14 +19,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    //@Valid allows for error handling that was set up in UserDTO
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@RequestBody UserDTO dto){
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody UserDTO dto){
         dto = userService.register(dto);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@RequestBody UserDTO dto) {
+    public ResponseEntity<UserDTO> login(@Valid @RequestBody UserDTO dto) {
         dto = userService.login(dto.getEmail(), dto.getPassword());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

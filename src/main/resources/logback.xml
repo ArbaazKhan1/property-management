@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This is the config file of how to set up logging for our application-->
+<configuration>
+
+    <!-- THis property is our variable, named Home_Log, with a value of logs folder with app.log in it   -->
+    <property name="HOME_LOG" value="logs/app.log"/>
+
+    <!-- There are 2 different Logging options in this config file. This first one is called FILE-ROLLING, this is a file based logging (line 10) which needs a path (comes from property)       -->
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}</file>
+
+        <!-- THis tells how to format the logger. It says to continue to put log files in the archived folder if they file exceeds 10MB and if the folder exceeds 20GB of space start deleting files also delete files that are older than 60 days       -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB,
+                it will delete old archived file -->
+            <totalSizeCap>20GB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+
+        <!-- Tells how to print the log       -->
+        <encoder>
+            <pattern>%d %p %c{1.} [%t] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36}.%M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- These springProfiles correspond with environment types. So if we are in the local environment our logging level is debug with it printing out in console   -->
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="STDOUT" />
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+
+    <springProfile name="test | acc | prod">
+        <root level="WARN">
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+</configuration>
